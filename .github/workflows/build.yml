@@ -1,0 +1,45 @@
+name: Build APK Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Siapkan aset
+        run: |
+          mkdir -p android/app/src/main/assets
+          mkdir -p android/app/src/main/res/drawable
+          cp index.html android/app/src/main/assets/
+          [ -f anime.mp4 ] && cp anime.mp4 android/app/src/main/assets/ || echo "anime.mp4 tidak ada"
+          [ -f iccon.png ] && cp iccon.png android/app/src/main/res/drawable/iccon.png || echo "iccon.png tidak ada"
+
+      - name: Buat keystore
+        run: |
+          keytool -genkeypair -v -keystore android/release.keystore \
+            -alias pekalongan -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass pekalongan404 -keypass pekalongan404 \
+            -dname "CN=MrKiplay, OU=Dev, O=Pekalongan404, L=Pekalongan, C=ID"
+
+      - name: Build release
+        working-directory: android
+        run: |
+          chmod +x gradlew || true
+          gradle wrapper --gradle-version 8.7 || true
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pekalongan404-release
+          path: android/app/build/outputs/apk/release/*.apk
