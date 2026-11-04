@@ -1,0 +1,36 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.mrkiplay.pekalongan404'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.mrkiplay.pekalongan404"
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName "3.0.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE") ?: "release.keystore")
+            storePassword System.getenv("KS_PASS") ?: "pekalongan404"
+            keyAlias System.getenv("KEY_ALIAS") ?: "pekalongan"
+            keyPassword System.getenv("KEY_PASS") ?: "pekalongan404"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies { implementation 'androidx.appcompat:appcompat:1.7.0' }
